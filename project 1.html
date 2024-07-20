@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Déplacement</title>
+</head>
+<body>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #gameArea {
+            width: 80vw;
+            height: 80vh;
+            background-color: #ddd;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        #entity {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+    <div id="gameArea">
+        <div id="entity"></div>
+    </div>
+    <script>
+        const entity = document.getElementById('entity');
+        const gameArea = document.getElementById('gameArea');
+
+        const entitySpeed = 5;
+        let keysPressed = {};
+
+        document.addEventListener('keydown', (event) => {
+            keysPressed[event.key] = true;
+        });
+
+        document.addEventListener('keyup', (event) => {
+            delete keysPressed[event.key];
+        });
+
+        function moveEntity() {
+            const entityRect = entity.getBoundingClientRect();
+            const gameAreaRect = gameArea.getBoundingClientRect();
+
+            if (keysPressed['ArrowUp'] && entityRect.top > gameAreaRect.top) {
+                entity.style.top = `${entity.offsetTop - entitySpeed}px`;
+            }
+            if (keysPressed['ArrowDown'] && entityRect.bottom < gameAreaRect.bottom) {
+                entity.style.top = `${entity.offsetTop + entitySpeed}px`;
+            }
+            if (keysPressed['ArrowLeft'] && entityRect.left > gameAreaRect.left) {
+                entity.style.left = `${entity.offsetLeft - entitySpeed}px`;
+            }
+            if (keysPressed['ArrowRight'] && entityRect.right < gameAreaRect.right) {
+                entity.style.left = `${entity.offsetLeft + entitySpeed}px`;
+            }
+
+            requestAnimationFrame(moveEntity);
+        }
+
+        moveEntity();
+    </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serpent_web</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #space {
+            width: 80vw;
+            height: 80vh;
+            background-color: green;
+            border: 2px solid #000;
+            position: relative;
+        }
+        #snake {
+            width: 50px;
+            height: 50px;
+            background-color: black;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+        }
+        #food {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            position: absolute;
+        }
+        #bonusFood {
+            width: 10px;
+            height: 10px;
+            background-color: yellow;
+            position: absolute;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <p>Temps Restant : <span id="timer">120</span> secondes</p>
+    <p>Score : <span id="score">0</span></p>
+    <main id="space">
+        <div id="snake"></div>
+        <div id="food"></div>
+        <div id="bonusFood"></div>
+    </main>
+    <script>
+        const snake = document.getElementById("snake");
+        const food = document.getElementById("food");
+        const bonusFood = document.getElementById("bonusFood");
+        const space = document.getElementById("space");
+        const scoreElement = document.getElementById("score");
+        const timerElement = document.getElementById("timer");
+        const snakeSpeed = 4; // Fixed speed
+        let snakePositionX = (space.clientWidth / 2) - (snake.clientWidth / 2);
+        let snakePositionY = space.clientHeight - snake.clientHeight;
+        let direction = '';
+        let score = 0;
+        let timeLeft = 120;
+        let gameInterval;
+        let timerInterval;
+        
+        snake.style.left = `${snakePositionX}px`;
+        snake.style.top = `${snakePositionY}px`;
+
+        function getRandomPosition(element) {
+            const x = Math.floor(Math.random() * (space.clientWidth - element.clientWidth));
+            const y = Math.floor(Math.random() * (space.clientHeight - element.clientHeight));
+            return { x, y };
+        }
+
+        function placeFood() {
+            const randomPosition = getRandomPosition(food);
+            food.style.left = `${randomPosition.x}px`;
+            food.style.top = `${randomPosition.y}px`;
+        }
+
+        function placeBonusFood() {
+            const randomPosition = getRandomPosition(bonusFood);
+            bonusFood.style.left = `${randomPosition.x}px`;
+            bonusFood.style.top = `${randomPosition.y}px`;
+            bonusFood.style.display = 'block';
+        }        
+
+        placeFood();
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') {
+                direction = 'up';
+            } else if (event.key === 'ArrowDown') {
+                direction = 'down';
+            } else if (event.key === 'ArrowLeft') {
+                direction = 'left';
+            } else if (event.key === 'ArrowRight') {
+                direction = 'right';
+            }
+        });
+
+        function moveSnake() {
+            if (direction === 'up') {
+                snakePositionY -= snakeSpeed;
+                if (snakePositionY < 0) {
+                    snakePositionY = space.clientHeight - snake.clientHeight;
+                }
+            } else if (direction === 'down') {
+                snakePositionY += snakeSpeed;
+                if (snakePositionY > space.clientHeight - snake.clientHeight) {
+                    snakePositionY = 0;
+                }
+            } else if (direction === 'left') {
+                snakePositionX -= snakeSpeed;
+                if (snakePositionX < 0) {
+                    snakePositionX = space.clientWidth - snake.clientWidth;
+                }
+            } else if (direction === 'right') {
+                snakePositionX += snakeSpeed;
+                if (snakePositionX > space.clientWidth - snake.clientWidth) {
+                    snakePositionX = 0;
+                }
+            }
+
+            snake.style.left = `${snakePositionX}px`;
+            snake.style.top = `${snakePositionY}px`;
+
+            checkCollision();
+        }
+
+        function checkCollision() {
+            const snakeRect = snake.getBoundingClientRect();
+            const foodRect = food.getBoundingClientRect();
+            const bonusFoodRect = bonusFood.getBoundingClientRect();
+
+            if (snakeRect.left < foodRect.left + foodRect.width &&
+                snakeRect.left + snakeRect.width > foodRect.left &&
+                snakeRect.top < foodRect.top + foodRect.height &&
+                snakeRect.top + snakeRect.height > foodRect.top) {
+                score++;
+                scoreElement.textContent = score;
+                placeFood();
+                if (score % 5 === 0) {
+                    placeBonusFood();
+                }
+            }
+
+            if (bonusFood.style.display === 'block' &&
+                snakeRect.left < bonusFoodRect.left + bonusFoodRect.width &&
+                snakeRect.left + snakeRect.width > bonusFoodRect.left &&
+                snakeRect.top < bonusFoodRect.top + bonusFoodRect.height &&
+                snakeRect.top + snakeRect.height > bonusFoodRect.top) {
+                score += 5;  // Bonus points
+                scoreElement.textContent = score;
+                bonusFood.style.display = 'none';
+            }
+        }
+
+        function startGame() {
+            gameInterval = setInterval(moveSnake, 100);
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+            } else {
+                clearInterval(gameInterval);
+                clearInterval(timerInterval);
+                alert(`Temps écoulé ! Votre score final est : ${score}`);
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
